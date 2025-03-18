@@ -27,6 +27,13 @@ class RegistrationController extends AbstractController
 
             // // encode the plain password
             $user->setPassword($userPasswordHasher->hashPassword($user, $plainPassword));
+            $userToMakeWait = new User();
+            $userToMakeWait->setEmail($user->getEmail())
+                ->setPassword($user->getPassword())
+                ->setRoles($user->getRoles())
+                ->setIsPaid(0);
+            $entityManager->persist($userToMakeWait);
+            $entityManager->flush();
             $session->set('pending_user', [
                 'email' => $user->getEmail(),
                 'password' => $userPasswordHasher->hashPassword($user, $form->get('plainPassword')->getData()),
@@ -36,8 +43,7 @@ class RegistrationController extends AbstractController
             // $entityManager->flush();
 
             // do anything else you need here, like send an email
-
-            return $this->redirectToRoute('app_subscription');
+            return $this->redirectToRoute('app_pricing');
         }
 
         return $this->render('registration/register.html.twig', [

@@ -25,6 +25,8 @@ class RegistrationFormType extends AbstractType
                         'message' => 'You should agree to our terms.',
                     ]),
                 ],
+                // 'help' => 'Read our <a href="/create-customer-portal-session" target="_blank">terms and conditions</a>.', // 🔗 Lien ici
+                // 'help_html' => true,
             ])
             ->add('plainPassword', PasswordType::class, [
                 // instead of being set onto the object directly,
