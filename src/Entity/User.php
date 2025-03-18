@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -35,6 +37,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column]
     private ?bool $isPaid = null;
+
+    /**
+     * @var Collection<int, StripePayment>
+     */
+    #[ORM\OneToMany(targetEntity: StripePayment::class, mappedBy: 'user_id', orphanRemoval: true)]
+    private Collection $stripePayments;
+
+    public function __construct()
+    {
+        $this->stripePayments = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -119,6 +132,36 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setIsPaid(bool $isPaid): static
     {
         $this->isPaid = $isPaid;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, StripePayment>
+     */
+    public function getStripePayments(): Collection
+    {
+        return $this->stripePayments;
+    }
+
+    public function addStripePayment(StripePayment $stripePayment): static
+    {
+        if (!$this->stripePayments->contains($stripePayment)) {
+            $this->stripePayments->add($stripePayment);
+            $stripePayment->setUserId($this);
+        }
+
+        return $this;
+    }
+
+    public function removeStripePayment(StripePayment $stripePayment): static
+    {
+        if ($this->stripePayments->removeElement($stripePayment)) {
+            // set the owning side to null (unless already changed)
+            if ($stripePayment->getUserId() === $this) {
+                $stripePayment->setUserId(null);
+            }
+        }
 
         return $this;
     }
